@@ -12,6 +12,10 @@ datMat <- "olivetti_X.csv" %>% # csv file contains data of face images taken bet
   read.csv(header=FALSE) %>% # Load csv file with data
   data.matrix # Convert data into matrix
 
+# Add labels
+labFace <- rep(1:40, each=10) # Images for 40 persons; 10 images for each person
+rownames(datMat) <- labFace
+  
 # Define function to show face image ####
 showFace <- function(x){
   x %>%
