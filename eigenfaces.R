@@ -7,15 +7,21 @@ if(!(require(dplyr))){install.packages('dplyr')}
 library(dplyr)
 
 # Load data ####
-datMat <- "olivetti_X.csv" %>% # csv file contains data of face images taken between April 1992 and April 1994 at AT&T Laboratories Cambridge 
+dat <- "olivetti_X.csv" %>% # csv file contains data of face images taken between April 1992 and April 1994 at AT&T Laboratories Cambridge 
                                # Each row contains data of one image quantized to 256 grey levels between 0 and 1
   read.csv(header=FALSE) %>% # Load csv file with data
   data.matrix # Convert data into matrix
 
 # Add labels
-labFace <- rep(1:40, each=10) # Images for 40 persons; 10 images for each person
-rownames(datMat) <- labFace
+faceLab <- rep(1:40, each=10) # Images for 40 persons; 10 images for each person
+rownames(dat) <- faceLab
   
+# Select faces for trining and for testing
+testFaces <- seq(from = 10, to = 400, by=10) # Variable selecting one face image of each person (one face image out of every ten face images) 
+datMat <- dat [-testFaces, ] # Data matrix for training excluding face images for testing
+datMatTest <- dat[testFaces, ] # Data matrix with face images for testing
+rm(dat) # Remove variable dat from working environemnt
+
 # Define function to show face image ####
 showFace <- function(x){
   x %>%
