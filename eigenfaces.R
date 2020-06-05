@@ -31,7 +31,7 @@ showFace <- function(x){
   image(col=grey(seq(0, 1, length=256)), xaxt="n", yaxt="n") # 256 diffrent intensities between 0 and 1 defined
   }
 
-# Display selected faces from dataset ####
+# Display selected faces from dataset  ####
 dev.off()
 par(mfrow=c(4, 10))
 par(mar=c(0.05, 0.05, 0.05, 0.05))
