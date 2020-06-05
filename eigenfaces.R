@@ -16,6 +16,11 @@ datMat <- "olivetti_X.csv" %>% # csv file contains data of face images taken bet
 labFace <- rep(1:40, each=10) # Images for 40 persons; 10 images for each person
 rownames(datMat) <- labFace
   
+# Select faces for trining and for testing
+testFaces <- seq(from = 10, to = 400, by=10) # Variable selecting one face image of each person (one face image out of every ten face images) 
+datMatTrain <- datMat[-testFaces, ] # Data matrix for training excluding face images for testing
+datMatTest <- datMat[testFaces, ] # Data matrix with face images for testing
+
 # Define function to show face image ####
 showFace <- function(x){
   x %>%
