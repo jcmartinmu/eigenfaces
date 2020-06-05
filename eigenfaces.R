@@ -86,7 +86,7 @@ showFace((datMat[1, ]))
 (coef[1, ] %*% t(eigVecSel) + avFace) %>%
   showFace()
 
-# New image under test ####
+# New image under test  ####
 coef142 <- (datMat[142, ] - avFace) %*% eigVecSel #Computing coefficients for image 142 by projecting it into eigenvector space
 calDiff <- function(x){
   ((x-coef142) %*% t(x-coef142)) %>%
