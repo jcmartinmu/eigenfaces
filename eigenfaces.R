@@ -6,18 +6,6 @@ setwd("~/R/eigenfaces")
 if(!(require(dplyr))){install.packages('dplyr')}
 library(dplyr)
 
-# Load data ####
-dataX <- "olivetti_X.csv" %>% # csv file contains data of face images taken between April 1992 and April 1994 at AT&T Laboratories Cambridge 
-                               # Each row contains data of one image quantized to 256 grey levels between 0 and 1
-  read.csv(header=FALSE) %>% # Load csv file with data
-  data.frame() # Convert data into data frame
-
-
-
-# Add labels ####
-faceLab <- rep(1:40, each=10) # Images for 40 persons; 10 images for each person
-rownames(dat) <- faceLab
-  
 # Define function to show face image ####
 showFace <- function(x){
   x %>%
@@ -27,6 +15,12 @@ showFace <- function(x){
   image(col=grey(seq(0, 1, length=256)), xaxt="n", yaxt="n") # 256 diffrent intensities between 0 and 1 defined
   }
 
+# Load data with face images####
+dataX <- "olivetti_X.csv" %>% # csv file contains data of face images taken between April 1992 and April 1994 at AT&T Laboratories Cambridge 
+                               # Each row contains data of one image quantized to 256 grey levels between 0 and 1
+  read.csv(header=FALSE) %>% # Load csv file with data
+  data.frame() # Convert data into data frame
+
 # Display selected faces from dataset  ####
  par(mfrow=c(4, 10))
 par(mar=c(0.05, 0.05, 0.05, 0.05))
@@ -34,14 +28,16 @@ for (i in 1:40) {
   showFace(dat[i, ])
   }
 
-# Sample face images  for training and filter remaining images for testing ####
+# Load data with labels####
 dataY <- "olivetti_y.csv" %>% #csv file containing labels/id of persons
   read.csv(header=FALSE) %>% # Load csv file with data
   data.frame() %>%# Convert data into data frame
 colnames(dataY) <- "Id" # 
 
+# Merge data with face images and labels####
 dataXY <- cbind(dataX, dataY)
 
+# Sample face images  for training and filter remaining images for testing ####
 
 dataTrain <- dataXY %>% group_by(Id) %>% # Data are grouped by Id
   sample_n(2) # 8 rows are sampled from each group and all the samples are put in one data frame
