@@ -12,11 +12,11 @@ dat <- "olivetti_X.csv" %>% # csv file contains data of face images taken betwee
   read.csv(header=FALSE) %>% # Load csv file with data
   data.matrix # Convert data into matrix
 
-# Add labels
+# Add labels ####
 faceLab <- rep(1:40, each=10) # Images for 40 persons; 10 images for each person
 rownames(dat) <- faceLab
   
-# Select faces for trining and for testing
+# Select faces for trining and for testing ####
 testFaces <- seq(from = 10, to = 400, by=10) # Variable selecting one face image of each person (one face image out of every ten face images) 
 datMat <- dat [-testFaces, ] # Data matrix for training excluding face images for testing
 datMatTest <- dat[testFaces, ] # Data matrix with face images for testing
