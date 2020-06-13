@@ -32,31 +32,21 @@ for (i in 1:40) {
 dataY <- "olivetti_y.csv" %>% #csv file containing labels/id of persons
   read.csv(header=FALSE) %>% # Load csv file with data
   data.frame() %>%# Convert data into data frame
-colnames(dataY) <- "Id" # 
+colnames(dataY) <- "Id" # Add column name for the column with lables
 
-# Merge data with face images and labels####
+# Merge data containing images with data containing labels####
 dataXY <- cbind(dataX, dataY)
 
 # Sample face images  for training and filter remaining images for testing ####
-
-dataTrain <- dataXY %>% group_by(Id) %>% # Data are grouped by Id
-  sample_n(2) # 8 rows are sampled from each group and all the samples are put in one data frame
-dataTest <- setdiff(dataXY, dataTrain) # Non-sampled are filtered out for testing 
-  
-
-
-testFaces <- seq(from = 10, to = 400, by=10) # Variable selecting one face image of each person (one face image out of every ten face images) 
-datMat <- dat [-testFaces, ] # Data matrix for training excluding face images for testing
-datMatTest <- dat[testFaces, ] # Data matrix with face images for testing
-rm(dat) # Remove variable dat from working environemnt
-
-seq(from = , to = c(399, 400), by=10)
-
+dataTrain <- dataXY %>% group_by(Id) %>% # Group data by person id
+  sample_n(2) %>% # Sample 8 images for each group and put them in one data frame
+  data.matrix() # Convert to matrix format
+dataTest <- setdiff(dataXY, dataTrain) %>% # Choose other (non-sampled) images for testing 
+  data.matrix() # Convert to matrix format
 # Compute and display average face (mean by each column) #### 
 avFace <- colMeans(datMat)
 dev.off()
 showFace(avFace)
-
 
 # Center data, calculate covariance matrix and its eigenvectors and eigenvalues #### 
 datMatCen <- scale(datMat, center = TRUE, scale = FALSE)
