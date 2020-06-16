@@ -9,6 +9,7 @@ library(dplyr)
 # Define function to show face image ####
 showFace <- function(x){
   x %>%
+  as.numeric%() >%
   matrix(nrow = 64, byrow = TRUE) %>% # Create matrix 64 by 64
   apply(2, rev) %>% #Rotate matrix by 90 degrees, step one : reverse columns 
   t %>% # Rotate matrix by 90 degrees, step two: transpose matrix
@@ -22,25 +23,44 @@ dataX <- "olivetti_X.csv" %>% # csv file contains data of face images taken betw
   data.frame() # Convert data into data frame
 
 # Display selected faces from dataset  ####
- par(mfrow=c(4, 10))
+par(mfrow=c(4, 10))
 par(mar=c(0.05, 0.05, 0.05, 0.05))
 for (i in 1:40) {
-  showFace(dat[i, ])
+  showFace(dataX[i, ])
   }
 
 # Load data with labels####
 dataY <- "olivetti_y.csv" %>% #csv file containing labels/id of persons
   read.csv(header=FALSE) %>% # Load csv file with data
-  data.frame() %>%# Convert data into data frame
+  data.frame() # Convert data into data frame
+
 colnames(dataY) <- "Id" # Add column name for the column with lables
+
+dataY<-seq(1:40) %>% # Create a sequence of label numbers from 1 to 40 corresponding to 40 persons
+  rep(each=10) %>% # Replicate 10 times each label number as we have 10 face images for each person
+  data.frame() %>% # Format as a data frame
+  mutate(id = row_number())
+
+colnames(dataY) <- c("Label", "Index") # Add column names for the column with lables and indices
+
+
+trainSamp <- dataY %>% 
+  group_by(Label) %>% # Group data by person id
+  sample_n(8) %>% # Sample 8 images for each group and put them in one data frame
+  arrange(Index) # Sort out the results by index 
+testSamp <-  setdiff(dataY, trainSamp)
 
 # Merge data containing images with data containing labels####
 dataXY <- cbind(dataX, dataY)
 
 # Sample face images  for training and filter remaining images for testing ####
-dataTrain <- dataXY %>% group_by(Id) %>% # Group data by person id
-  sample_n(2) %>% # Sample 8 images for each group and put them in one data frame
+TrainSam <- dataY %>% 
+  group_by(Id) %>% # Group data by person id
+  sample_n(2) # Sample 8 images for each group and put them in one data frame
   data.matrix() # Convert to matrix format
+
+
+
 dataTest <- setdiff(dataXY, dataTrain) %>% # Choose other (non-sampled) images for testing 
   data.matrix() # Convert to matrix format
 # Compute and display average face (mean by each column) #### 
