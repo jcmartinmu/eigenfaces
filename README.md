@@ -1,2 +1,3 @@
 # eigenfaces
 principal directions and singular values are related to the eigenvalues of covariance matrix via <img src="/tex/668f7241087de36e913fdb26e46c1e3c.svg?invert_in_darkmode&sanitize=true" align=middle width=115.807593pt height=26.76175259999998pt/>
+principal directions and singular values are related to the eigenvalues of covariance matrix via <img src="/tex/668f7241087de36e913fdb26e46c1e3c.svg?invert_in_darkmode&sanitize=true" align=middle width=115.807593pt height=26.76175259999998pt/>
