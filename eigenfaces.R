@@ -29,28 +29,22 @@ for (i in 1:40) {
   showFace(dataX[i, ])
   }
 
-# Load data with labels####
-dataY <- "olivetti_y.csv" %>% #csv file containing labels/id of persons
-  read.csv(header=FALSE) %>% # Load csv file with data
-  data.frame() # Convert data into data frame
-
-colnames(dataY) <- "Id" # Add column name for the column with lables
-
+# Create labels####
 dataY<-seq(1:40) %>% # Create a sequence of label numbers from 1 to 40 corresponding to 40 persons
   rep(each=10) %>% # Replicate 10 times each label number as we have 10 face images for each person
   data.frame() %>% # Format as a data frame
   mutate(index = row_number()) %>% #Add a column with indices 
   select(2, label = 1) # Move the index column to the front and give a name to the column with labels
 
-
-trainSampInd <- dataY %>% 
-  group_by(label) %>% # Group data by a person label
-  sample_n(8) %>% # Sample 8 face images from each group and set them in one data frame
-  arrange(index) # Sort out the results by index 
+# Split data with image faces into training data and test data 
+trainSampInd <- dataY %>% # Use ata with indices and lables
+  group_by(label) %>% # Group data by a label
+  sample_n(8) %>% # Sample 8 indices of face images from each group and set them in one data frame
+  arrange(index) # Sort out the results which give indices of the data to be included in the set of training data
    
-testSampInd <-  setdiff(dataY, trainSampInd)
+testSampInd <-  setdiff(dataY, trainSampInd) # Determine indices of the data to be included in the set of test data
 
-DataMat <- dataX %>%
+dataMat <- dataX %>%
   filter(row_number() %in% trainSampInd[, "index", drop=TRUE]) %>%
   data.matrix() %>%
   `rownames<-`(trainSampInd[, "label", drop=TRUE])
@@ -62,9 +56,9 @@ testDataMat <- dataX %>%
   `rownames<-`(testSampInd[, "label", drop=TRUE])
 
 # Compute and display average face (mean by each column) #### 
-avFace <- colMeans(DataMat)
+avTrainFace <- colMeans(DataMat)
 dev.off()
-showFace(avFace)
+showFace(avTrainFace)
 
 # Center data, calculate covariance matrix and its eigenvectors and eigenvalues #### 
 dataMatCen <- scale(dataMat, center = TRUE, scale = FALSE)
@@ -97,24 +91,36 @@ for (i in 1:16) {
 
 # Project the data matrix onto the space spanned by the selected eigenvectors
 dev.off()
-coef <- dataMatCen %*% eigVecSel
-barplot(coef[1, ], main = "Coefficients of the projection onto eigenvectors for the first image", ylim = c(-8, 4)) #
+coefTrainFaces <- dataMatCen %*% eigVecSel # Calculate coeeficients for all training faces
+barplot(coefTrainFaces[1, ], main = "Coefficients of the projection onto eigenvectors for the first image", ylim = c(-8, 4)) #
 
 # Reconstruct first image using coefficients and eigenvectors (eigenfaces)
 dev.off()
 par(mfrow=c(1, 2))
 par(mar=c(0.05, 0.05, 0.05, 0.05))
-showFace((datMat[1, ]))
-(coef[1, ] %*% t(eigVecSel) + avFace) %>%
+showFace((dataMat[1, ]))
+(coefTrainFaces[1, ] %*% t(eigVecSel) + avTrainFace) %>%
   showFace()
 
 # New image under test  ####
-coef142 <- (datMat[142, ] - avFace) %*% eigVecSel #Computing coefficients for image 142 by projecting it into eigenvector space
-calDiff <- function(x){
-  ((x-coef142) %*% t(x-coef142)) %>%
+
+i = 1
+subAvTrainFace <- function(x){
+  x-avTrainFace
+  }
+temp <- testDataMat %>%
+  apply(1, function(x){x-avTrainFace}) 
+
+coefTestFaces <- temp %*% eigVecSel
+
+coefTestFaces <- (testDataMat[i,] - avTrainFace) %*% eigVecSel #Computing coefficients for test image by projecting it into eigenvector space
+
+calDif <- function(x){
+  ((x-faceCoef) %*% t(x-faceCoef)) %>%
     sqrt
 }
-diff <- apply(coef, 1, calDiff)
+
+difCoef <- apply(faceCoef, 1, calDif)
 NumFace <- which(min(diff)==diff)
 
 # Display similarity plot
