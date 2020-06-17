@@ -9,7 +9,7 @@ library(dplyr)
 # Define function to show face image ####
 showFace <- function(x){
   x %>%
-  as.numeric%() >%
+  as.numeric() %>%
   matrix(nrow = 64, byrow = TRUE) %>% # Create matrix 64 by 64
   apply(2, rev) %>% #Rotate matrix by 90 degrees, step one : reverse columns 
   t %>% # Rotate matrix by 90 degrees, step two: transpose matrix
@@ -39,38 +39,36 @@ colnames(dataY) <- "Id" # Add column name for the column with lables
 dataY<-seq(1:40) %>% # Create a sequence of label numbers from 1 to 40 corresponding to 40 persons
   rep(each=10) %>% # Replicate 10 times each label number as we have 10 face images for each person
   data.frame() %>% # Format as a data frame
-  mutate(id = row_number())
-
-colnames(dataY) <- c("Label", "Index") # Add column names for the column with lables and indices
-
-
-trainSamp <- dataY %>% 
-  group_by(Label) %>% # Group data by person id
-  sample_n(8) %>% # Sample 8 images for each group and put them in one data frame
-  arrange(Index) # Sort out the results by index 
-testSamp <-  setdiff(dataY, trainSamp)
-
-# Merge data containing images with data containing labels####
-dataXY <- cbind(dataX, dataY)
-
-# Sample face images  for training and filter remaining images for testing ####
-TrainSam <- dataY %>% 
-  group_by(Id) %>% # Group data by person id
-  sample_n(2) # Sample 8 images for each group and put them in one data frame
-  data.matrix() # Convert to matrix format
+  mutate(index = row_number()) %>% #Add a column with indices 
+  select(2, label = 1) # Move the index column to the front and give a name to the column with labels
 
 
+trainSampInd <- dataY %>% 
+  group_by(label) %>% # Group data by a person label
+  sample_n(8) %>% # Sample 8 face images from each group and set them in one data frame
+  arrange(index) # Sort out the results by index 
+   
+testSampInd <-  setdiff(dataY, trainSampInd)
 
-dataTest <- setdiff(dataXY, dataTrain) %>% # Choose other (non-sampled) images for testing 
-  data.matrix() # Convert to matrix format
+DataMat <- dataX %>%
+  filter(row_number() %in% trainSampInd[, "index", drop=TRUE]) %>%
+  data.matrix() %>%
+  `rownames<-`(trainSampInd[, "label", drop=TRUE])
+
+
+testDataMat <- dataX %>%
+  filter(row_number() %in% testSampInd[, "index", drop=TRUE]) %>%
+  data.matrix() %>%
+  `rownames<-`(testSampInd[, "label", drop=TRUE])
+
 # Compute and display average face (mean by each column) #### 
-avFace <- colMeans(datMat)
+avFace <- colMeans(DataMat)
 dev.off()
 showFace(avFace)
 
 # Center data, calculate covariance matrix and its eigenvectors and eigenvalues #### 
-datMatCen <- scale(datMat, center = TRUE, scale = FALSE)
-covMat <- t(datMatCen) %*% datMatCen / nrow(datMat-1)
+dataMatCen <- scale(dataMat, center = TRUE, scale = FALSE)
+covMat <- t(dataMatCen) %*% dataMatCen / nrow(dataMat-1)
 eig <- eigen(covMat)
 eigVec <- eig$vectors # Eigenvectors as unit vectors define axes of the preincipal components
 eigVal <- eig$values # Corresponding eigenvalues define variances along the axes of the principal components 
@@ -99,7 +97,7 @@ for (i in 1:16) {
 
 # Project the data matrix onto the space spanned by the selected eigenvectors
 dev.off()
-coef <- datMatCen %*% eigVecSel
+coef <- dataMatCen %*% eigVecSel
 barplot(coef[1, ], main = "Coefficients of the projection onto eigenvectors for the first image", ylim = c(-8, 4)) #
 
 # Reconstruct first image using coefficients and eigenvectors (eigenfaces)
