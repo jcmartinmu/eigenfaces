@@ -56,9 +56,9 @@ testDataMat <- dataX %>%
   `rownames<-`(testSampInd[, "label", drop=TRUE])
 
 # Compute and display average face (mean by each column) #### 
-avTrainFace <- colMeans(DataMat)
+avFace <- colMeans(DataMat)
 dev.off()
-showFace(avTrainFace)
+showFace(avFace)
 
 # Center data, calculate covariance matrix and its eigenvectors and eigenvalues #### 
 dataMatCen <- scale(dataMat, center = TRUE, scale = FALSE)
@@ -99,34 +99,39 @@ dev.off()
 par(mfrow=c(1, 2))
 par(mar=c(0.05, 0.05, 0.05, 0.05))
 showFace((dataMat[1, ]))
-(coefTrainFaces[1, ] %*% t(eigVecSel) + avTrainFace) %>%
+(coefTrainFaces[1, ] %*% t(eigVecSel) + avFace) %>%
   showFace()
 
-# New image under test  ####
+# Use test faces   ####
 
-i = 1
-subAvTrainFace <- function(x){
-  x-avTrainFace
-  }
-temp <- testDataMat %>%
-  apply(1, function(x){x-avTrainFace}) 
+coefTestFaces<- testDataMat %>%
+  apply(1, function(x) x-avFace) %>%
+  t %*% 
+  eigVecSel
 
-coefTestFaces <- temp %*% eigVecSel
 
-coefTestFaces <- (testDataMat[i,] - avTrainFace) %*% eigVecSel #Computing coefficients for test image by projecting it into eigenvector space
 
 calDif <- function(x){
-  ((x-faceCoef) %*% t(x-faceCoef)) %>%
+  ((x-coefTestSel) %*% t(x-coefTestSel)) %>%
     sqrt
 }
 
-difCoef <- apply(faceCoef, 1, calDif)
-NumFace <- which(min(diff)==diff)
+testRes <- matrix(NA, nrow = 80, ncol = 3) %>%
+  data.frame %>%
+  `colnames<-`(c("Label of image", "Label identified in test", "Correct (1) / Wrong (0)"))
 
-# Display similarity plot
-dev.off()
-barplot(diff,main = "Similarity Plot ") # Warning: extend horizontaly plot to see better results
-      
+for (i in 1:nrow(coefTestFaces)) {
+  coefTestSel <- coefTestFaces[i, , drop=FALSE]
+  difCoef <- apply(coefTrainFaces, 1, calDif)
+  testRes[i, 1] <- rownames(DataMat)[which(min(difCoef)==difCoef)]
+  testRes[i, 2]  <- rownames(testDataMat)[i]
+}
+
+testRes[, 3] <- ifelse(testRes[, 2] == testRes[, 1], 1, 0)
+(shareCor <- sum(testRes[, 3])/nrow(testRes))
+
+
+     
 
 #####################################################################
 # Calculate covariance matrix for centered data ####
