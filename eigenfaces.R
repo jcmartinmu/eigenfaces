@@ -1,7 +1,7 @@
 # Set up working directory and load libraries ####
 
 rm(list=ls())
-setwd("~/R/eigenfaces")
+#setwd("~/R/eigenfaces") #Set working directory to this script file location
 
 if(!(require(dplyr))){install.packages('dplyr')}
 library(dplyr)
@@ -22,7 +22,7 @@ dataX <- "olivetti_X.csv" %>% # csv file contains data of face images taken betw
   read.csv(header=FALSE) %>% # Load csv file with data
   data.frame() # Convert data into data frame
 
-# Display selected faces from dataset  ####
+# Display faces selected from dataset  ####
 par(mfrow=c(4, 10))
 par(mar=c(0.05, 0.05, 0.05, 0.05))
 for (i in 1:40) {
@@ -37,10 +37,10 @@ dataY<-seq(1:40) %>% # Create a sequence of label numbers from 1 to 40 correspon
   select(2, label = 1) # Move the index column to the front and give a name to the column with labels
 
 # Split data with image faces into training data and test data 
-trainSampInd <- dataY %>% # Use ata with indices and lables
-  group_by(label) %>% # Group data by a label
+trainSampInd <- dataY %>% # Use data with indices and lables
+  group_by(label) %>% # Group data by label
   sample_n(8) %>% # Sample 8 indices of face images from each group and set them in one data frame
-  arrange(index) # Sort out the results which give indices of the data to be included in the set of training data
+  arrange(index) # Sort out the results by index
    
 testSampInd <-  setdiff(dataY, trainSampInd) # Determine indices of the data to be included in the set of test data
 
@@ -48,7 +48,6 @@ dataMat <- dataX %>%
   filter(row_number() %in% trainSampInd[, "index", drop=TRUE]) %>%
   data.matrix() %>%
   `rownames<-`(trainSampInd[, "label", drop=TRUE])
-
 
 testDataMat <- dataX %>%
   filter(row_number() %in% testSampInd[, "index", drop=TRUE]) %>%
@@ -75,7 +74,7 @@ eigVec <- svd$v # Eigenvectors of covarianve matrix are right singular vectors o
 eigVal <- svd$d^2/(ncol(dataMatCen)-1) # Eigenvalues of covariance matrix are squared singular values devided by n-1, where n is the number of columns 
                                        # Eigenvalues (corresponding to eigenvectors) define variances along the axes of the principal components 
 
-# Compute and display proportions of variance explained by the principal components
+# Compute and display the proportions of variance explained by the principal components
 varProp <- eigVal/sum(eigVal) # Proportion of variance in the total variance
 varCumProp <- cumsum(eigVal)/sum(eigVal) # Proportion of cumulative varinace in the total variance
 
@@ -99,7 +98,7 @@ for (i in 1:16) {
 
 # Project the data matrix onto the space spanned by the selected eigenvectors
 dev.off()
-coefTrainFaces <- dataMatCen %*% eigVecSel # Calculate coeeficients for all training faces
+coefTrainFaces <- dataMatCen %*% eigVecSel # Calculate coeficients/weights for all training faces
 barplot(coefTrainFaces[1, ], main = "Coefficients of the projection onto eigenvectors for the first image", ylim = c(-8, 4)) #
 
 # Reconstruct first image using coefficients and eigenvectors (eigenfaces)
@@ -110,12 +109,12 @@ showFace((dataMat[1, ]))
 (coefTrainFaces[1, ] %*% t(eigVecSel) + avFace) %>%
   showFace()
 
-# Use test faces   ####
+# Project the test data matrix onto the space spanned by the eigenvectors determined by training data  ####
 
-coefTestFaces<- testDataMat %>%
-  apply(1, function(x) x-avFace) %>%
-  t %*% 
-  eigVecSel
+coefTestFaces<- testDataMat %>% # Use test data
+  apply(1, function(x) x-avFace) %>% # Deduct the vector of the average face from each row vector of the test data matrix
+  t %*% # Transpose the results from columns into rows
+  eigVecSel # Project the row vectors with test images onto the space spanned by the eigenvector
 
 
 calDif <- function(x){
@@ -123,276 +122,19 @@ calDif <- function(x){
     sqrt
 }
 
+# Creating empty matrix to store test results
 testRes <- matrix(NA, nrow = 80, ncol = 2) %>%
   data.frame %>%
   `colnames<-`(c("Label of image", "Label identified in test", "Correct (1) / Wrong (0)"))
 
-for (i in 1:nrow(coefTestFaces)) {
-  coefTestSel <- coefTestFaces[i, , drop=FALSE]
-  difCoef <- apply(coefTrainFaces, 1, calDif)
-  testRes[i, 1] <- rownames(DataMat)[which(min(difCoef)==difCoef)]
-  testRes[i, 2]  <- rownames(testDataMat)[i]
+# Conducting test exercise for all test faces
+for (i in 1:nrow(coefTestFaces)) { # Start loop for row vectors with test faces
+  coefTestSel <- coefTestFaces[i, , drop=FALSE] # Estract coefficients of i test face
+  difCoef <- apply(coefTrainFaces, 1, calDif) # Calculating the diffrence between the coefficients of i test face and each traing face
+  testRes[i, 1] <- rownames(DataMat)[which(min(difCoef)==difCoef)] # Provide the label of training face recording the minimum diffrence with i test face
+  testRes[i, 2]  <- rownames(testDataMat)[i] # Provide the label of i test face
 }
 
-testRes[, 3] <- ifelse(testRes[, 2] == testRes[, 1], 1, 0)
-(shareCor <- sum(testRes[, 3])/nrow(testRes))
+testRes[, 3] <- ifelse(testRes[, 2] == testRes[, 1], 1, 0) # Provide 1 for correct and 0 for wrong results
+(shareCor <- sum(testRes[, 3])/nrow(testRes)) # Calclulate share of correct results
 
-
-#####################################################################
-# Calculate covariance matrix for centered data ####
-# Covariance matrix could be calculated as follows:
-# covMatrix <- t(dataMatrixCent) %*% dataMatrixCent
-# This would however give a large matrix 4096x4096
-# Instead we calculated the follwoing matrix 400x400:
-# CovMat_ = dataMatrixCent %*% t(dataMatrixCent)
-# Instead of A'*A, calculate A*A'
-covMatrix_ <- dataMatrixCent %*% t(dataMatrixCent)
-
-#Eginvalues and eigenvectors for CovMatrix_ (with underscore)
-# Function eigen() gives by default eigenvectors as unit vectors 
-eigen <- eigen(covMatrix_)
-eigenvectors_ <- eigen$vectors
-eigenvalues_ <- eigen$values
-
-# Postive eigenvalues for CovMatrix are the same as egigenvalues for CovMatrix_
-eigenvalues <- eigenvalues_
-
-# Calculate eginevectors for CovMatrix using the following identity:
-# A*A'*X(i) = Lambda(i)*X(i)
-# A'*A*A'*X(i) = A'*Lambda(i)*X(i)
-# A'*A*[A'*X(i)] = Lambda(i)*[A'*X(i)]
-# CovMatrix has 400 eigenvectors linked to positive eigenvalues 
-# Other eigenvectors are linked with eigenvalues having value of zero
-eigenvectors <- t(dataMatrixCent) %*% eigenvectors_
-
-# Display first 16 eigenfaces (eigenvectors) ####
-dev.off()
-par(mfrow=c(4, 4))
-par(mar=c(0.05, 0.05, 0.05, 0.05))
-for (i in 1:16) {
-  showFace(eigenvectors[, i])
-}
-
-# Calculate and display the proportion of variance explained by each component
-# and cumulative variance explained by the components
-varProportion <- eigenvalues/sum(eigenvalues)
-varCumulative <- cumsum(eigenvalues)/sum(eigenvalues)
-dev.off()
-par(mfrow=c(1, 2))
-plot(varProportion*100, xlab = "Eigenvalues", ylab = "Percentage" , main = "Proportion in the total variance")
-plot(varCumulative*100, xlab = "Eigenvalues", ylab = "Percentage" , main = "Proportion of the cumulative variance in the total variance")
-
-
-#Choose the number of principal components
-threshold <- min(which(varCumulative > 0.95))
-#threshold <- 400
-
-# Projection of 1st image  onto eigenvectors
-# coefs = A * E
-dev.off()
-coefsFace1 <- dataMatrixCent[1, ] %*% eigenvectors 
-barplot(CoefsFace1, main = "Coefficients of the projection onto eigenvectors", ylim = c(-600, 100))
-eigenvectSelec <- eigenvectors[, 1:threshold]
-coefsFace1Selec <- coefsFace1[, 1:threshold, drop = FALSE]
-dim(eigenvectSelec)
-dim(coefsFace1Selec)
-# Reconstruct first image using coefficients and eigenfaces
-dev.off()
-par(mfrow=c(1, 2))
-par(mar=c(0.05, 0.05, 0.05, 0.05))
-showFace((dataMatrix[1, ]))
-(coefsFace1Selec %*% t(eigenvectSelec) + averageFace) %>%
-  showFace()
-
-
-
-
-
-dev.off()
-par(mfrow=c(4, 4))
-par(mar=c(0.05, 0.05, 0.05, 0.05))
-for (i in 1:16) {
-  showFace(eigenvectors[, i])
-}
-
-dev.off()
-par(mfrow=c(1, 2))
-par(mar=c(0.05, 0.05, 0.05, 0.05))
-plotImage(image1)
-plotImage(image1Reconst)
-
-
-# Rotate first image 90 degrees for display
-#image2 <- t(apply(matrix(as.numeric(faceData[1, ]), nrow = 64, byrow = T), 2, rev))
-#plotImage(image2)
-image2 <- t(matrix(as.numeric(faceData[1, ncol(faceData):1]), nrow = 64, byrow = T), 2, rev)
-plotImage(image2)
-
-
-
-
-
-
-# Rotate every image and save to a new file for easy display in R
-dataTemp <- NULL
-for (i in 1:nrow(faceData)) {
-  #imageRotated <- as.numeric(t(apply(matrix(as.numeric(faceData[1, ]), nrow = 64, byrow = T), 2, rev)))
-  #dataTemp <- rbind(dataTemp, imageRotated)
-  image <- faceData[i, ] %>% 
-           as.numeric %>% 
-           matrix(nrow = 64, byrow = TRUE) %>%
-           apply(2, rev) %>% 
-           t %>%
-           as.numeric
-    #t %>%
-           
-  dataTemp <- rbind(dataTemp, image)
-} 
-
-#dataTemp2 <- as.data.frame(dataTemp)
-write.csv(dataTemp, "train_faces.csv")
-
-faceData2 <- read.csv("train_faces.csv", header = FALSE)
-
-dev.off()
-image1 <- matrix(as.numeric(faceData2[1, ]), nrow = 64, byrow = T)
-plotImage(image1)
-
-
-
-
-img1 <- as.numeric(faceData[1, ])
-# Image upside down
-img2 <- matrix(img1, nrow=64, byrow=T)
-# Image corrected
-img3 <- t(img2)[, nrow(img2):1]
-# Vector containing the image
-img4 <- as.numeric(t(img3))
-plotImage(img2)
-plotImage(img3)
-plotImage(img4)
-
-imageT <- faceData[1, ] %>% 
-       as.numeric %>% 
-       matrix(nrow = 64, byrow = TRUE) %>%
-       apply(2, rev) %>% 
-       t #%>%
-       t #%>%
-       as.numeric
-
-       image <- faceData[1, ] %>% 
-         as.numeric %>% 
-         matrix(nrow = 64, byrow = TRUE) %>%
-         apply(2, rev) %>% 
-         t %>%
-         t %>%
-         as.numeric      
-       
-       plotImage(image)
-
-
-faceData2 <- read.csv("train_faces.csv", header = FALSE)
-
-dev.off()
-image1 <- matrix(as.numeric(faceData2[1, ]), nrow = 64, byrow = T)
-plotImage(image1)
-
-
-p
-#clear parameters to visualise images
-dev.off()
-#Vectorize image
-
-#Compute the mean vector: average faces
-
-#Principal component analysis (PCA)
-
-#Plot of eigenfaces (eigenvectors)
-
-#Projection of the photo from the eigenvector space
-
-#Reconstruction of the photo from the eigenvector space
-
-
-#Converting data from data frame format into matrix 
-#and rescaling data from 0 to 1 instead of 0 to 255 required by function image
-X <- t(as.matrix(faces)/255)
-
-dim(X)
-#Looking at the structure of matrix
-str(X)
-
-#Defining the function to plot image
-#grey scale intensity is required to be from 0 to 1
-#256 diffrent intenities are defined
-plt.img <- function(x){image(x, col=grey(seq(0, 1, length=256)))}
-
-#Creating matrix for first image  64x64 
-#from the first row of X with length of 4096
-img1 <- apply(matrix(X[4, 4096:1], nrow=64, byrow=T), 1, rev)
-
-#Plotting image1
-plt.img(img1)
-
-#####
-par(mfrow=c(1, 2))
-img1 <- apply(matrix(X[1, 4096:1], nrow=64, byrow=T), 1, rev)
-
-#Plotting image1
-plt.img(img1)
-
-img2 <- apply(matrix(X[1, 1:4096], nrow=64, byrow=T), 1, rev)
-
-#Plotting image2
-plt.img(img2)
-
-t <- t(faces)
-
-df <- as.data.frame(t(faces))
-
-str(df)
-im <- t(matrix(as.numeric(df[2, 4096:1]), ncol = 64, nrow = 64))
-#im <- t(matrix(as.numeric(df[2, 1:4096]), ncol = 64, nrow = 64))
-
-plt.img <- function(x){image(x, col=grey(seq(0, 1, length=256)))}
-plt.img(im)
-
-
-
-temp <- as.numeric(df[2, 4096:1])
-
-temp2 <- df[2, 4096:1]
-#Rotating first image 90 degree for display
-#by firstly reversing the order of columns and secondly transposing
-img1.r <- t(apply(matrix(X[1, ], nrow=64, byrow=T), 2, rev))
-plt.img(img1.r)
-
-img1.r <- apply(matrix(X[1, ], nrow=64, byrow=T), 1, rev)
-plt.img(img1.r)
-dev.off()
-  
-
-head(faces)
-str(faces)
-faces$V1
-X <- faces
-X <- (data(faces)) 
-X <- data.matrix(data("faces")) # %>% data.matrix()
-
-
-X2 <- read.csv("olivetti_X.csv", header = F) %>% as.matrix()
-str(X)
-b <- matrix(as.numeric(X2[1, ]), nrow=64, byrow=T)
-plotImage <- function(x){image(x, col=grey(seq(0, 1, length=256)))}
-
-b <- matrix(as.numeric(X2[1, ]), nrow=64, byrow=T)
-plotImage(b)
-
-c <- t(apply(matrix(as.numeric(X[1, ]), nrow=64, byrow=T), 2, rev))
-plotImg(c)
-
-c <- t(matrix(as.numeric (X[1, ]), nrow=64, byrow=T))
-plotImg(c)
-
-#plotImage <- function(x){image(x, col=grey(seq(0, 1, length=256)), xaxt="n", yaxt="n")}
-#rotateImage <- function(x){x <- t(apply(x, 2, rev))}
