@@ -55,17 +55,25 @@ testDataMat <- dataX %>%
   data.matrix() %>%
   `rownames<-`(testSampInd[, "label", drop=TRUE])
 
-# Compute and display average face (mean by each column) #### 
+# Compute and display the average face (mean by each column) #### 
 avFace <- colMeans(DataMat)
 dev.off()
 showFace(avFace)
 
-# Center data, calculate covariance matrix and its eigenvectors and eigenvalues #### 
-dataMatCen <- scale(dataMat, center = TRUE, scale = FALSE)
-covMat <- t(dataMatCen) %*% dataMatCen / nrow(dataMat-1)
+# A) Center data, calculate covariance matrix and its eigenvectors and eigenvalues #### 
+dataMatCen <- scale(dataMat, center = TRUE, scale = FALSE) # Center data
+covMat <- t(dataMatCen) %*% dataMatCen / nrow(dataMat-1) # Calculate covariance matrix
 eig <- eigen(covMat)
 eigVec <- eig$vectors # Eigenvectors as unit vectors define axes of the preincipal components
 eigVal <- eig$values # Corresponding eigenvalues define variances along the axes of the principal components 
+
+# B) Center data, conduct svd
+dataMatCen <- scale(dataMat, center = TRUE, scale = FALSE) # Center data
+svd <- svd(dataMatCen) # Conduct singular value decomposition
+eigVec <- svd$v # Eigenvectors of covarianve matrix are right singular vectors of svd
+                # Eigenvectors as unit vectors define axes of the preincipal components
+eigVal <- svd$d^2/(ncol(dataMatCen)-1) # Eigenvalues of covariance matrix are squared singular values devided by n-1, where n is the number of columns 
+                                       # Eigenvalues (corresponding to eigenvectors) define variances along the axes of the principal components 
 
 # Compute and display proportions of variance explained by the principal components
 varProp <- eigVal/sum(eigVal) # Proportion of variance in the total variance
@@ -110,13 +118,12 @@ coefTestFaces<- testDataMat %>%
   eigVecSel
 
 
-
 calDif <- function(x){
   ((x-coefTestSel) %*% t(x-coefTestSel)) %>%
     sqrt
 }
 
-testRes <- matrix(NA, nrow = 80, ncol = 3) %>%
+testRes <- matrix(NA, nrow = 80, ncol = 2) %>%
   data.frame %>%
   `colnames<-`(c("Label of image", "Label identified in test", "Correct (1) / Wrong (0)"))
 
@@ -130,8 +137,6 @@ for (i in 1:nrow(coefTestFaces)) {
 testRes[, 3] <- ifelse(testRes[, 2] == testRes[, 1], 1, 0)
 (shareCor <- sum(testRes[, 3])/nrow(testRes))
 
-
-     
 
 #####################################################################
 # Calculate covariance matrix for centered data ####
