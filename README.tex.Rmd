@@ -14,7 +14,9 @@ library(knitr)
 ```
 This project ..
 
-
+$$
+\frac{n!}{k!(n-k)!} = {n \choose k}
+$$
 Set working directory to source file location. Then, install and load libraries:
 ```{r libraries, message=FALSE, warning=FALSE}
 if(!(require(dplyr))){install.packages('dplyr')}
@@ -125,3 +127,6 @@ one $e^{i\pi} = -1$ two
 
 
 asd cf <img src="https://math.now.sh?inline=\log\prod^N_{i}x_{i}=\sum^N_i\log{x_i}" valign="baseline"> rsd
+$$
+\frac{n!}{k!(n-k)!} = {n \choose k}
+$$

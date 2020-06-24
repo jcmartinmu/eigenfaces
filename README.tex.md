@@ -1,7 +1,10 @@
 
 This project ..
 
-Set working directory to source file location. Then, install and load libraries:
+$$
+\\frac{n!}{k!(n-k)!} = {n \\choose k}
+$$
+ Set working directory to source file location. Then, install and load libraries:
 
 ``` r
 if(!(require(dplyr))){install.packages('dplyr')}
@@ -92,3 +95,6 @@ Note that the `echo = FALSE` parameter was added to the code chunk to prevent pr
 one *e*<sup>*i**π*</sup> = −1 two
 
 asd cf <img src="https://math.now.sh?inline=\log\prod^N_{i}x_{i}=\sum^N_i\log{x_i}" valign="baseline"> rsd
+$$
+\\frac{n!}{k!(n-k)!} = {n \\choose k}
+$$
