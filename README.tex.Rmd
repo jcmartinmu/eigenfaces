@@ -40,7 +40,6 @@ Load data with face images:
 dataX <- "olivetti_X.csv" %>% 
   read.csv(header=FALSE) %>% 
   data.frame()
-str(dataX, list.len = 5)
 ```
 
 The loaded csv file contains data of face images taken between April 1992 and April 1994 at AT&T Laboratories Cambridge. Each row contains data of one image quantized to 256 grey levels between 0 and 1. After loading, the data are converted into the data frame format.
