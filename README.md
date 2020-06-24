@@ -37,9 +37,9 @@ This project Let the data matrix **X** be *n x p* size, where *n* is the number 
 
 **C** = **X**<sup>*T*</sup>**X**/(*n* − 1).
  As it is a square symmetric matrix, it can be diagonalised as follows:
-**C** = **V****Λ****V**<sup>*T*</sup>,
+<p align="center"><img src="/tex/20b12e3298c62c559ec3481647dd00c4.svg?invert_in_darkmode&sanitize=true" align=middle width=318.031593pt height=17.8466442pt/></p>
 
-where **V** is a matrix of orthogonal eigenvectors (where each column is an eigenvector) and **Λ** is a diagonal matrix with eigenvalues *λ*<sub>*i*</sub> in the decreasing order from the largest to the smallest value on the diagonal. The eigenvectors determine principal directions or principal axes of the data. The variables corresponding to these principal axes are known as principal components. Projections of the data on the principal axes gives scores of these principal components. The *j*-th principal component is given by *j*-th column of the matrix product **X****V**. The coordinates of the *i*-th row of **X****V** data point in the new PC space are given by the *i*-th row of the matrix product **X****V**.
+where **V** is a matrix of orthogonal eigenvectors (where each column is an eigenvector) and <img src="/tex/ec8a57ac2c7bde09bdc5bc4b893c317b.svg?invert_in_darkmode&sanitize=true" align=middle width=104.4029415pt height=45.84475499999998pt/> is a diagonal matrix with eigenvalues *λ*<sub>*i*</sub> in the decreasing order from the largest to the smallest value on the diagonal. The eigenvectors determine principal directions or principal axes of the data. The variables corresponding to these principal axes are known as principal components. Projections of the data on the principal axes gives scores of these principal components. The *j*-th principal component is given by *j*-th column of the matrix product **XV**. The coordinates of the *i*-th row of **XV** data point in the new PC space are given by the *i*-th row of the matrix product **XV**.
 
 If we now perform singular value decomposition of **X**, we obtain a decomposition
 **X** = **U****S****V**<sup>*T*</sup>,
@@ -48,13 +48,13 @@ If we now perform singular value decomposition of **X**, we obtain a decompositi
 
 **C** = **V**<sup>*T*</sup>**S****U**<sup>*T*</sup>**U****S****V**<sup>*T*</sup>/(*n* − 1),
 
-<p align="center"><img src="/tex/af6b8bddd0396164b592d933b9fd87c8.svg?invert_in_darkmode&sanitize=true" align=middle width=398.28277664999996pt height=17.8466442pt/></p>
+<p align="center"><img src="/tex/79ef30e5701a31c2bd3a41df95aae6c5.svg?invert_in_darkmode&sanitize=true" align=middle width=359.85019289999997pt height=17.8466442pt/></p>
 
 meaning that right singular vectors **V** are principal directions and singular values are related to the eigenvalues of covariance matrix via
 *λ*<sub>*i*</sub> = *s*<sub>*i*</sub><sup>2</sup>/(*n* − 1).
  Principal components are given by
-**X****V** = **U****S****V**<sup>*T*</sup>**V** = **U****S**
-. If **X** = **U****S****V**<sup>*T*</sup>, then columns of **V** are orthonormal principal directions) determining principal axis. Columns of **U****S** are principal components with their scores Singular values *s*<sub>*i*</sub> are related to the eigenvalues *λ*<sub>*i*</sub> of covariance matrix **C** via
+**XV** = **USV**<sup>*T*</sup>**V** = **US**
+. If **X** = **USV**<sup>*T*</sup>, then columns of **V** are orthonormal principal directions) determining principal axis. Columns of **US** are principal components with their scores Singular values *s*<sub>*i*</sub> are related to the eigenvalues *λ*<sub>*i*</sub> of covariance matrix **C** via
 *λ*<sub>*i*</sub> = *s*<sub>*i*</sub><sup>2</sup>/(*n* − 1).
 
 Eigenvalues *λ*<sub>*i*</sub> show varinaces of the respective PCs.
@@ -74,7 +74,7 @@ You can also embed plots, for example:
 
 ![](Figures/pressure-1.png)
 
-<p align="center"><img src="/tex/825ec43ad36c6652676bb4630e7e11c1.svg?invert_in_darkmode&sanitize=true" align=middle width=404.1224352pt height=14.611878599999999pt/></p>
+<p align="center"><img src="/tex/068357dd137e4d188cd6cf4df9e1963f.svg?invert_in_darkmode&sanitize=true" align=middle width=394.51429049999996pt height=14.611878599999999pt/></p>
 
 <p align="center"><img src="/tex/accef9be330fae5c1bd6a0c5bd832c7c.svg?invert_in_darkmode&sanitize=true" align=middle width=73.89302744999999pt height=17.399144399999997pt/></p>
 <p align="center"><img src="/tex/63272eb9f4fe3ea1688b7c455f39f8c2.svg?invert_in_darkmode&sanitize=true" align=middle width=245.77026539999997pt height=16.438356pt/></p>
