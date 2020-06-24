@@ -1,12 +1,17 @@
-# Set up working directory and load libraries ####
-
+# Clear workspace ####
 rm(list=ls())
-#setwd("~/R/eigenfaces") #Set working directory to this script file location
+
+# Set working directory to source file location ####
+#setwd("~/R/eigenfaces")
+
+# Install and load libraries ####
 
 if(!(require(dplyr))){install.packages('dplyr')}
 library(dplyr)
 
-# Define function to show face image ####
+# Define a function to show face images ####
+#  The purpose of this function is to convert a vector with the image into a matrix 
+# and fix the issue concerning R function `image` which creates a grid with 90 degree counter-clockwise rotation of the conventional printed layout of a matrix.
 showFace <- function(x){
   x %>%
   as.numeric() %>%
@@ -14,13 +19,14 @@ showFace <- function(x){
   apply(2, rev) %>% #Rotate matrix by 90 degrees, step one : reverse columns 
   t %>% # Rotate matrix by 90 degrees, step two: transpose matrix
   image(col=grey(seq(0, 1, length=256)), xaxt="n", yaxt="n") # 256 diffrent intensities between 0 and 1 defined
-  }
+}
 
 # Load data with face images####
-dataX <- "olivetti_X.csv" %>% # csv file contains data of face images taken between April 1992 and April 1994 at AT&T Laboratories Cambridge 
+dataX <- "olivetti_X.csv" %>% # The loaded csv file contains data of face images taken between April 1992 and April 1994 at AT&T Laboratories Cambridge 
                                # Each row contains data of one image quantized to 256 grey levels between 0 and 1
   read.csv(header=FALSE) %>% # Load csv file with data
   data.frame() # Convert data into data frame
+str(dataX)
 
 # Display faces selected from dataset  ####
 par(mfrow=c(4, 10))
@@ -60,18 +66,18 @@ dev.off()
 showFace(avFace)
 
 # A) Center data, calculate covariance matrix and its eigenvectors and eigenvalues #### 
-dataMatCen <- scale(dataMat, center = TRUE, scale = FALSE) # Center data
-covMat <- t(dataMatCen) %*% dataMatCen / nrow(dataMat-1) # Calculate covariance matrix
-eig <- eigen(covMat)
-eigVec <- eig$vectors # Eigenvectors as unit vectors define axes of the preincipal components
-eigVal <- eig$values # Corresponding eigenvalues define variances along the axes of the principal components 
+#dataMatCen <- scale(dataMat, center = TRUE, scale = FALSE) # Center data
+#covMat <- t(dataMatCen) %*% dataMatCen / nrow(dataMat-1) # Calculate covariance matrix
+#eig <- eigen(covMat)
+#eigVec <- eig$vectors # Eigenvectors as unit vectors define axes of the preincipal components
+#eigVal <- eig$values # Corresponding eigenvalues define variances along the axes of the principal components 
 
-# B) Center data, conduct svd
+# B) Center data, conduct svd (more numerically stable )
 dataMatCen <- scale(dataMat, center = TRUE, scale = FALSE) # Center data
 svd <- svd(dataMatCen) # Conduct singular value decomposition
-eigVec <- svd$v # Eigenvectors of covarianve matrix are right singular vectors of svd
+eigVec <- svd$v # Eigenvectors of covarianve matrix are equal to right singular vectors of svd
                 # Eigenvectors as unit vectors define axes of the preincipal components
-eigVal <- svd$d^2/(ncol(dataMatCen)-1) # Eigenvalues of covariance matrix are squared singular values devided by n-1, where n is the number of columns 
+eigVal <- svd$d^2/(ncol(dataMatCen)-1) # Eigenvalues of covariance matrix are equal to squared singular values devided by n-1, where n is the number of columns 
                                        # Eigenvalues (corresponding to eigenvectors) define variances along the axes of the principal components 
 
 # Compute and display the proportions of variance explained by the principal components
@@ -109,7 +115,7 @@ showFace((dataMat[1, ]))
 (coefTrainFaces[1, ] %*% t(eigVecSel) + avFace) %>%
   showFace()
 
-# Project the test data matrix onto the space spanned by the eigenvectors determined by training data  ####
+# Project the matrix with test data onto the space spanned by the eigenvectors determined by training data  ####
 
 coefTestFaces<- testDataMat %>% # Use test data
   apply(1, function(x) x-avFace) %>% # Deduct the vector of the average face from each row vector of the test data matrix
@@ -122,12 +128,12 @@ calDif <- function(x){
     sqrt
 }
 
-# Creating empty matrix to store test results
+# Create an empty matrix to store test results
 testRes <- matrix(NA, nrow = 80, ncol = 2) %>%
   data.frame %>%
   `colnames<-`(c("Label of image", "Label identified in test", "Correct (1) / Wrong (0)"))
 
-# Conducting test exercise for all test faces
+# Conduct test exercise for all test faces
 for (i in 1:nrow(coefTestFaces)) { # Start loop for row vectors with test faces
   coefTestSel <- coefTestFaces[i, , drop=FALSE] # Estract coefficients of i test face
   difCoef <- apply(coefTrainFaces, 1, calDif) # Calculating the diffrence between the coefficients of i test face and each traing face
