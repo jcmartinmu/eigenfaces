@@ -37,9 +37,9 @@ This project Let the data matrix **X** be *n x p* size, where *n* is the number 
 
 **C** = **X**<sup>*T*</sup>**X**/(*n* − 1).
  As it is a square symmetric matrix, it can be diagonalised as follows:
-**C** = **V****Λ****V**<sup>*T*</sup>,
+$$\\textbf{C}=\\textbf{V}\\textbf{\\Lambda}\\textbf{V}^T,$$
 
-where **V** is a matrix of orthogonal eigenvectors (where each column is an eigenvector) and **Λ** is a diagonal matrix with eigenvalues *λ*<sub>*i*</sub> in the decreasing order from the largest to the smallest value on the diagonal. The eigenvectors determine principal directions or principal axes of the data. The variables corresponding to these principal axes are known as principal components. Projections of the data on the principal axes gives scores of these principal components. The *j*-th principal component is given by *j*-th column of the matrix product **X****V**. The coordinates of the *i*-th row of **X****V** data point in the new PC space are given by the *i*-th row of the matrix product **X****V**.
+where **V** is a matrix of orthogonal eigenvectors (where each column is an eigenvector) and $\\textbf{\\Lambda}$ is a diagonal matrix with eigenvalues *λ*<sub>*i*</sub> in the decreasing order from the largest to the smallest value on the diagonal. The eigenvectors determine principal directions or principal axes of the data. The variables corresponding to these principal axes are known as principal components. Projections of the data on the principal axes gives scores of these principal components. The *j*-th principal component is given by *j*-th column of the matrix product **XV**. The coordinates of the *i*-th row of **XV** data point in the new PC space are given by the *i*-th row of the matrix product **XV**.
 
 If we now perform singular value decomposition of **X**, we obtain a decomposition
 **X** = **U****S****V**<sup>*T*</sup>,
@@ -48,13 +48,13 @@ If we now perform singular value decomposition of **X**, we obtain a decompositi
 
 **C** = **V**<sup>*T*</sup>**S****U**<sup>*T*</sup>**U****S****V**<sup>*T*</sup>/(*n* − 1),
 
-$$\\mathbf{C}=\\mathbf{V}^T\\frac{\\mathbf{S}^2}{n-1}\\mathbf{V}^T,$$
+$$\\textbf{C}=\\textbf{V}^T\\frac{\\textbf{S}^2}{n-1}\\textbf{V}^T,$$
 
 meaning that right singular vectors **V** are principal directions and singular values are related to the eigenvalues of covariance matrix via
 *λ*<sub>*i*</sub> = *s*<sub>*i*</sub><sup>2</sup>/(*n* − 1).
  Principal components are given by
-**X****V** = **U****S****V**<sup>*T*</sup>**V** = **U****S**
-. If **X** = **U****S****V**<sup>*T*</sup>, then columns of **V** are orthonormal principal directions) determining principal axis. Columns of **U****S** are principal components with their scores Singular values *s*<sub>*i*</sub> are related to the eigenvalues *λ*<sub>*i*</sub> of covariance matrix **C** via
+**XV** = **USV**<sup>*T*</sup>**V** = **US**
+. If **X** = **USV**<sup>*T*</sup>, then columns of **V** are orthonormal principal directions) determining principal axis. Columns of **US** are principal components with their scores Singular values *s*<sub>*i*</sub> are related to the eigenvalues *λ*<sub>*i*</sub> of covariance matrix **C** via
 *λ*<sub>*i*</sub> = *s*<sub>*i*</sub><sup>2</sup>/(*n* − 1).
 
 Eigenvalues *λ*<sub>*i*</sub> show varinaces of the respective PCs.
@@ -74,7 +74,7 @@ You can also embed plots, for example:
 
 ![](Figures/pressure-1.png)
 
-$$\\mathbf{X} = \\left\[\\begin{array}
+$$\\textbf{X} = \\left\[\\begin{array}
 {rrr}
 1 & 2 & 3 \\\\
 4 & 5 & 6 \\\\
