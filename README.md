@@ -1,7 +1,8 @@
 
 This project ..
 
-Set working directory to source file location. Then, install and load libraries:
+<p align="center"><img src="/tex/d318927ba009e0a830badc8837cbfcb6.svg?invert_in_darkmode&sanitize=true" align=middle width=206.69359425pt height=16.438356pt/></p>
+ Set working directory to source file location. Then, install and load libraries:
 
 ``` r
 if(!(require(dplyr))){install.packages('dplyr')}
@@ -86,3 +87,4 @@ Note that the `echo = FALSE` parameter was added to the code chunk to prevent pr
 one *e*<sup>*i**π*</sup> = −1 two
 
 asd cf <img src="https://math.now.sh?inline=\log\prod^N_{i}x_{i}=\sum^N_i\log{x_i}" valign="baseline"> rsd
+<p align="center"><img src="/tex/d318927ba009e0a830badc8837cbfcb6.svg?invert_in_darkmode&sanitize=true" align=middle width=206.69359425pt height=16.438356pt/></p>
