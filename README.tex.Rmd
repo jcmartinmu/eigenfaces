@@ -1,7 +1,6 @@
 ---
 output:
   github_document
-    
 ---
 
 
@@ -30,7 +29,7 @@ showFace <- function(x){
   matrix(nrow = 64, byrow = TRUE) %>% 
   apply(2, rev) %>%  
   t %>% 
-  image(col=grey(seq(0, 1, length=256)), xaxt="n", yaxt="n") # 256 diffrent intensities between 0 and 1 defined
+  image(col=grey(seq(0, 1, length=256)), xaxt="n", yaxt="n")
   }
 ```
 
@@ -54,7 +53,6 @@ Let the data matrix $\mathbf{X}$ be *n x p* size, where *n* is the number of dat
 Then the *p x p* covariance matrix is given by $\mathbf{C}$:
 
 $$\mathbf{C}=\mathbf{X}^T\mathbf{X}/(n-1).$$
-
 As it is a square symmetric matrix, it can be diagonalised as follows:
 $$\mathbf{C}=\mathbf{V}\mathbf{\Lambda}\mathbf{V}^T,$$
 
