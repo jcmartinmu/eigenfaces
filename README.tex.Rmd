@@ -13,7 +13,7 @@ knitr::opts_chunk$set(
   )
 library(knitr)
 ```
-This project ....
+This project ...
 
 
 Set working directory to source file location. Then, install and load libraries:
