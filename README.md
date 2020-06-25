@@ -1,4 +1,4 @@
 
 This project ..
 
-<p align="center"><img src="/tex/ab90e0cc0179115abfb8506e4b7d9dc4.svg?invert_in_darkmode&sanitize=true" align=middle width=206.69359425pt height=16.438356pt/></p>
+<p align="center"><img src="/tex/c4b633bb78f7a6733b622b8e2f326dfc.svg?invert_in_darkmode&sanitize=true" align=middle width=218.2594722pt height=17.399144399999997pt/></p>
