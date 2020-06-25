@@ -2,5 +2,5 @@
 This project ..
 
 $$
-\\frac{n!}{k!(n-k)!}={n\\choose k}
+E=\\frac{mc^2}{\\sqrt{1-\\frac{v^2}{c^2}}}
 $$
