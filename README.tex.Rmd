@@ -1,13 +1,11 @@
 ---
 output:
   github_document
-    
 ---
 
 
 
 This project ..
 
-$$
-E=\frac{mc^2}{\sqrt{1-\frac{v^2}{c^2}}}
-$$
+
+$$\lambda_i=s_i^2/(n-1).$$
