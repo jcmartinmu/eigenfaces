@@ -5,14 +5,7 @@ output:
 ---
 
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(
-  fig.path = "Figures/",
-  comment = "#>",
-  collapse = TRUE
-  )
-library(knitr)
-```
+
 This project ..
 
 $$
