@@ -108,14 +108,16 @@ We can either calculate a covariance matrix and its eigenvectors with eigenvalue
 ``` r
 covMat <- t(dataMatCen) %*% dataMatCen / nrow(dataMat-1) 
 eig <- eigen(covMat)
-eigVec <- eig<img src="/tex/0e4ef9959d8c168ac8325b1877e57976.svg?invert_in_darkmode&sanitize=true" align=middle width=158.16642269999997pt height=22.831056599999986pt/>values 
+eigVec <- eig$vectors 
+eigVal <- eig$values 
 ```
 
 The eigenvectors (eigenfaces) of the covariance matrix as unit define axes of the principal components. The corresponding eigenvalues define variances along the axes of the principal components. This is the code to conduct singular value decomposition:
 
 ``` r
 svd <- svd(dataMatCen)
-eigVec <- svd<img src="/tex/1cf30597ceac5762a55d5d02a55c19b4.svg?invert_in_darkmode&sanitize=true" align=middle width=116.98744199999999pt height=22.831056599999986pt/>d^2/(ncol(dataMatCen)-1) 
+eigVec <- svd$v 
+eigVal <- svd$d^2/(ncol(dataMatCen)-1) 
 ```
 
 The eigenvectors of the covariance matrix are equal to the right singular vectors of svd. The eigenvalues of the covariance matrix are equal to the squared singular values divided by n-1, where n is the number of columns. Compute and display the proportions of variance explained by the principal components:
