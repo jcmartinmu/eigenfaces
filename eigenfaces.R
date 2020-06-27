@@ -37,12 +37,13 @@ for (i in 1:40) {
 
 # Create labels####
 dataY<-seq(1:40) %>% # Create a sequence of label numbers from 1 to 40 corresponding to 40 persons
-  rep(each=10) %>% # Replicate 10 times each label number as we have 10 face images for each person
-  data.frame() %>% # Format as a data frame
+  rep(each=10) %>% # Replicate 10 times each label number as we have 10 face images in sequence for each person
+  data.frame() %>% # Convert to a data frame
   mutate(index = row_number()) %>% #Add a column with indices 
   select(2, label = 1) # Move the index column to the front and give a name to the column with labels
 
 # Split data with image faces into training data and test data 
+set.seed(1234)
 trainSampInd <- dataY %>% # Use data with indices and lables
   group_by(label) %>% # Group data by label
   sample_n(8) %>% # Sample 8 indices of face images from each group and set them in one data frame
@@ -61,26 +62,27 @@ testDataMat <- dataX %>%
   `rownames<-`(testSampInd[, "label", drop=TRUE])
 
 # Compute and display the average face (mean by each column) #### 
-avFace <- colMeans(DataMat)
+avFace <- colMeans(dataMat)
 dev.off()
 showFace(avFace)
 
-# A) Center data, calculate covariance matrix and its eigenvectors and eigenvalues #### 
-#dataMatCen <- scale(dataMat, center = TRUE, scale = FALSE) # Center data
+#Center data
+dataMatCen <- scale(dataMat, center = TRUE, scale = FALSE)
+
+# A) Calculate covariance matrix and its eigenvectors and eigenvalues #### 
 #covMat <- t(dataMatCen) %*% dataMatCen / nrow(dataMat-1) # Calculate covariance matrix
 #eig <- eigen(covMat)
 #eigVec <- eig$vectors # Eigenvectors as unit vectors define axes of the preincipal components
 #eigVal <- eig$values # Corresponding eigenvalues define variances along the axes of the principal components 
 
-# B) Center data, conduct svd (more numerically stable )
-dataMatCen <- scale(dataMat, center = TRUE, scale = FALSE) # Center data
+# B) Conduct svd (more numerically stable )####
 svd <- svd(dataMatCen) # Conduct singular value decomposition
-eigVec <- svd$v # Eigenvectors of covarianve matrix are equal to right singular vectors of svd
+eigVec <- svd$v # Eigenvectors of covariance matrix are equal to right singular vectors of svd
                 # Eigenvectors as unit vectors define axes of the preincipal components
 eigVal <- svd$d^2/(ncol(dataMatCen)-1) # Eigenvalues of covariance matrix are equal to squared singular values devided by n-1, where n is the number of columns 
                                        # Eigenvalues (corresponding to eigenvectors) define variances along the axes of the principal components 
 
-# Compute and display the proportions of variance explained by the principal components
+# Compute and display the proportions of variance explained by the principal components ####
 varProp <- eigVal/sum(eigVal) # Proportion of variance in the total variance
 varCumProp <- cumsum(eigVal)/sum(eigVal) # Proportion of cumulative varinace in the total variance
 
@@ -90,7 +92,7 @@ plot(varProp*100, xlab = "Eigenvalues", ylab = "Percentage" , main = "Proportion
 plot(varCumProp*100, xlab = "Eigenvalues", ylab = "Percentage" , main = "Proportion of the cumulative variance in the total variance")
 
 
-#Select eigenvectors 
+#Select eigenvectors ####
 thresNum <- min(which(varCumProp > 0.95)) # Princiapal components explains at least 95% of the total variance
 eigVecSel <-  eigVec[, 1:thresNum]
 
@@ -102,12 +104,15 @@ for (i in 1:16) {
   showFace(eigVecSel[, i])
 }
 
-# Project the data matrix onto the space spanned by the selected eigenvectors
+# Project the data matrix onto the space spanned by the selected eigenvectors ####
 dev.off()
-coefTrainFaces <- dataMatCen %*% eigVecSel # Calculate coeficients/weights for all training faces
+coefTrainFaces <- dataMatCen %*% eigVecSel %>% # Calculate coefficients (weights) for each training face
+  `rownames<-`(rownames(dataMat)) # Make each rowname with the coefficients the label of the corresponding face image.
+
+ 
 barplot(coefTrainFaces[1, ], main = "Coefficients of the projection onto eigenvectors for the first image", ylim = c(-8, 4)) #
 
-# Reconstruct first image using coefficients and eigenvectors (eigenfaces)
+# Reconstruct first image using coefficients and eigenvectors (eigenfaces) ####
 dev.off()
 par(mfrow=c(1, 2))
 par(mar=c(0.05, 0.05, 0.05, 0.05))
@@ -116,29 +121,29 @@ showFace((dataMat[1, ]))
   showFace()
 
 # Project the matrix with test data onto the space spanned by the eigenvectors determined by training data  ####
-
 coefTestFaces<- testDataMat %>% # Use test data
   apply(1, function(x) x-avFace) %>% # Deduct the vector of the average face from each row vector of the test data matrix
   t %*% # Transpose the results from columns into rows
-  eigVecSel # Project the row vectors with test images onto the space spanned by the eigenvector
-
+  eigVecSel %>%# Calculate coefficients (weights) for each test face by projecting the row vectors with test images onto the space spanned by the eigenvector
+  `rownames<-`(rownames(testDataMat)) # Make each rowname with the coefficients the label of the corresponding face image.
 
 calDif <- function(x){
   ((x-coefTestSel) %*% t(x-coefTestSel)) %>%
     sqrt
 }
 
-# Create an empty matrix to store test results
-testRes <- matrix(NA, nrow = 80, ncol = 2) %>%
+# Create an empty matrix to store test results ####
+testRes <- matrix(NA, nrow = 80, ncol = 3) %>%
   data.frame %>%
-  `colnames<-`(c("Label of image", "Label identified in test", "Correct (1) / Wrong (0)"))
+  `colnames<-`(c("Face.label", "Identified.label", "Correct.1/Wrong.0"))
 
-# Conduct test exercise for all test faces
+# Conduct test exercise for all test faces ####
 for (i in 1:nrow(coefTestFaces)) { # Start loop for row vectors with test faces
-  coefTestSel <- coefTestFaces[i, , drop=FALSE] # Estract coefficients of i test face
+  coefTestSel <- coefTestFaces[i, , drop=FALSE] # Extract coefficients of i test face
   difCoef <- apply(coefTrainFaces, 1, calDif) # Calculating the diffrence between the coefficients of i test face and each traing face
-  testRes[i, 1] <- rownames(DataMat)[which(min(difCoef)==difCoef)] # Provide the label of training face recording the minimum diffrence with i test face
-  testRes[i, 2]  <- rownames(testDataMat)[i] # Provide the label of i test face
+  testRes[i, 1]  <- rownames(coefTestFaces)[i] # Provide the label of i test face
+  testRes[i, 2] <- rownames(coefTrainFaces)[which(min(difCoef)==difCoef)] # Provide the label of training face recording the minimum diffrence with i test face
+  
 }
 
 testRes[, 3] <- ifelse(testRes[, 2] == testRes[, 1], 1, 0) # Provide 1 for correct and 0 for wrong results
