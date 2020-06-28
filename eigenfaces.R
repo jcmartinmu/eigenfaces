@@ -10,8 +10,6 @@ if(!(require(dplyr))){install.packages('dplyr')}
 library(dplyr)
 
 # Define a function to show face images ####
-#  The purpose of this function is to convert a vector with the image into a matrix 
-# and fix the issue concerning R function `image` which creates a grid with 90 degree counter-clockwise rotation of the conventional printed layout of a matrix.
 showFace <- function(x){
   x %>%
   as.numeric() %>%
@@ -19,7 +17,15 @@ showFace <- function(x){
   apply(2, rev) %>% #Rotate matrix by 90 degrees, step one : reverse columns 
   t %>% # Rotate matrix by 90 degrees, step two: transpose matrix
   image(col=grey(seq(0, 1, length=256)), xaxt="n", yaxt="n") # 256 diffrent intensities between 0 and 1 defined
-}
+}#  The purpose of this function is to convert a vector with the image into a matrix 
+# and fix the issue concerning R function `image` which creates a grid with 90 degree counter-clockwise rotation of the conventional printed layout of a matrix.
+
+# Define a function to calculate the Euclidean distance between two vectors with weights####
+calDif <- function(x){
+  ((x-coefTestSel) %*% t(x-coefTestSel)) %>%
+    sqrt
+} # This function will be used in the test exercise
+
 
 # Load data with face images####
 dataX <- "olivetti_X.csv" %>% # The loaded csv file contains data of face images taken between April 1992 and April 1994 at AT&T Laboratories Cambridge 
@@ -70,16 +76,16 @@ showFace(avFace)
 dataMatCen <- scale(dataMat, center = TRUE, scale = FALSE)
 
 # A) Calculate covariance matrix and its eigenvectors and eigenvalues #### 
-covMat <- t(dataMatCen) %*% dataMatCen / nrow(dataMat-1) # Calculate covariance matrix
-eig <- eigen(covMat)
-eigVec <- eig$vectors # Eigenvectors as unit vectors define axes of the preincipal components
-eigVal <- eig$values # Corresponding eigenvalues define variances along the axes of the principal components 
+#covMat <- t(dataMatCen) %*% dataMatCen / nrow(dataMat-1) # Calculate covariance matrix
+#eig <- eigen(covMat)
+#eigVec <- eig$vectors # Eigenvectors as unit vectors define axes of the preincipal components
+#eigVal <- eig$values # Corresponding eigenvalues define variances along the axes of the principal components 
 
 # B) Conduct svd (more numerically stable )####
-#svd <- svd(dataMatCen) # Conduct singular value decomposition
-#eigVec <- svd$v # Eigenvectors of covariance matrix are equal to right singular vectors of svd
+svd <- svd(dataMatCen) # Conduct singular value decomposition
+eigVec <- svd$v # Eigenvectors of covariance matrix are equal to right singular vectors of svd
                 # Eigenvectors as unit vectors define axes of the preincipal components
-#eigVal <- svd$d^2/(ncol(dataMatCen)-1) # Eigenvalues of covariance matrix are equal to squared singular values devided by n-1, where n is the number of columns in the data matrix 
+eigVal <- svd$d^2/(ncol(dataMatCen)-1) # Eigenvalues of covariance matrix are equal to squared singular values devided by n-1, where n is the number of columns in the data matrix 
                                        # Eigenvalues (corresponding to eigenvectors) define variances along the axes of the principal components 
 
 # Compute and display the proportions of variance explained by the principal components ####
@@ -126,12 +132,6 @@ coefTestFaces<- testDataMat %>% # Use test data
   t %*% # Transpose the results from columns into rows
   eigVecSel %>%# Calculate coefficients (weights) for each test face by projecting the row vectors with test images onto the space spanned by the eigenvector
   `rownames<-`(rownames(testDataMat)) # Make each rowname with the coefficients the label of the corresponding face image.
-
-# Define a function to calculate the Euclidean distance between two vectors with weights
-calDif <- function(x){
-  ((x-coefTestSel) %*% t(x-coefTestSel)) %>%
-    sqrt
-} # This function will be used in a test exercise
 
 # Create an empty matrix to store test results ####
 testRes <- matrix(NA, nrow = 80, ncol = 3) %>%
