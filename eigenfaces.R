@@ -70,16 +70,16 @@ showFace(avFace)
 dataMatCen <- scale(dataMat, center = TRUE, scale = FALSE)
 
 # A) Calculate covariance matrix and its eigenvectors and eigenvalues #### 
-#covMat <- t(dataMatCen) %*% dataMatCen / nrow(dataMat-1) # Calculate covariance matrix
-#eig <- eigen(covMat)
-#eigVec <- eig$vectors # Eigenvectors as unit vectors define axes of the preincipal components
-#eigVal <- eig$values # Corresponding eigenvalues define variances along the axes of the principal components 
+covMat <- t(dataMatCen) %*% dataMatCen / nrow(dataMat-1) # Calculate covariance matrix
+eig <- eigen(covMat)
+eigVec <- eig$vectors # Eigenvectors as unit vectors define axes of the preincipal components
+eigVal <- eig$values # Corresponding eigenvalues define variances along the axes of the principal components 
 
 # B) Conduct svd (more numerically stable )####
-svd <- svd(dataMatCen) # Conduct singular value decomposition
-eigVec <- svd$v # Eigenvectors of covariance matrix are equal to right singular vectors of svd
+#svd <- svd(dataMatCen) # Conduct singular value decomposition
+#eigVec <- svd$v # Eigenvectors of covariance matrix are equal to right singular vectors of svd
                 # Eigenvectors as unit vectors define axes of the preincipal components
-eigVal <- svd$d^2/(ncol(dataMatCen)-1) # Eigenvalues of covariance matrix are equal to squared singular values devided by n-1, where n is the number of columns in the data matrix 
+#eigVal <- svd$d^2/(ncol(dataMatCen)-1) # Eigenvalues of covariance matrix are equal to squared singular values devided by n-1, where n is the number of columns in the data matrix 
                                        # Eigenvalues (corresponding to eigenvectors) define variances along the axes of the principal components 
 
 # Compute and display the proportions of variance explained by the principal components ####
@@ -127,10 +127,11 @@ coefTestFaces<- testDataMat %>% # Use test data
   eigVecSel %>%# Calculate coefficients (weights) for each test face by projecting the row vectors with test images onto the space spanned by the eigenvector
   `rownames<-`(rownames(testDataMat)) # Make each rowname with the coefficients the label of the corresponding face image.
 
+# Define a function to calculate the Euclidean distance between two vectors with weights
 calDif <- function(x){
   ((x-coefTestSel) %*% t(x-coefTestSel)) %>%
     sqrt
-}
+} # This function will be used in a test exercise
 
 # Create an empty matrix to store test results ####
 testRes <- matrix(NA, nrow = 80, ncol = 3) %>%
@@ -147,5 +148,6 @@ for (i in 1:nrow(coefTestFaces)) { # Start loop for row vectors with test faces
 }
 
 testRes[, 3] <- ifelse(testRes[, 2] == testRes[, 1], 1, 0) # Provide 1 for correct and 0 for wrong results
+testRes[1:10, ] # Display the results for the first 10 test faces
 (shareCor <- sum(testRes[, 3])/nrow(testRes)) # Calclulate share of correct results
 
