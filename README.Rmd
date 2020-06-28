@@ -22,7 +22,7 @@ When a new test face is presented for classification, its own weights are found 
 
 More theoretical background can be found in:
 
-* Strang Gilbert, [Introduction to Linear Algebra](https://math.mit.edu/~gs/linearalgebra/), 5th Edition, Wellesley-Cambridge Press, 2016 (see [6.1 Introduction to Eigenvalues](https://math.mit.edu/~gs/linearalgebra/linearalgebra5_6-1.pdf), [7.1 Image Processing by Linear Algebra](https://math.mit.edu/~gs/linearalgebra/linearalgebra5_7-1.pdf), 7.3 Principal Component Analysis (PCA by the SVD))
+* Strang Gilbert, [Introduction to Linear Algebra](https://math.mit.edu/~gs/linearalgebra/), 5th Edition, Wellesley-Cambridge Press, 2016 (see [6.1 Introduction to Eigenvalues and Eigenvectors](https://math.mit.edu/~gs/linearalgebra/linearalgebra5_6-1.pdf), [7.1 Image Processing by Linear Algebra](https://math.mit.edu/~gs/linearalgebra/linearalgebra5_7-1.pdf), 7.3 Principal Component Analysis (PCA by the SVD))
 * Turk, Matthew A. and Pentland, Alex P., [Face recognition using eigenfaces](https://www.cin.ufpe.br/~rps/Artigos/Face%20Recognition%20Using%20Eigenfaces.pdf). Computer Vision and Pattern Recognition, 1991. Proceedings, IEEE Computer Society Conference in 1991
 
 When performing human face recognition, the code in file "eigenfaces.R" includes the following three main parts:
@@ -210,10 +210,10 @@ showFace((dataMat[1, ]))
 ##Face recognition
 Project the matrix with test data onto the space spanned by the eigenvectors determined by train data:
 ```{r}
-coefTestFaces<- testDataMat %>% # 
-  apply(1, function(x) x-avFace) %>% # 
-  t %*% # 
-  eigVecSel # 
+coefTestFaces<- testDataMat %>% 
+  apply(1, function(x) x-avFace) %>%  
+  t %*% 
+  eigVecSel 
 ```
 
 The test data are used. The vector of the average face of the train data is deducted from each row vector of the test data matrix before transposing the row vectors with test images onto the space spanned by the eigenvectors of the covariance matrix of the train data.
