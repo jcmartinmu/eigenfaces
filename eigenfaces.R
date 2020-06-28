@@ -79,7 +79,7 @@ dataMatCen <- scale(dataMat, center = TRUE, scale = FALSE)
 svd <- svd(dataMatCen) # Conduct singular value decomposition
 eigVec <- svd$v # Eigenvectors of covariance matrix are equal to right singular vectors of svd
                 # Eigenvectors as unit vectors define axes of the preincipal components
-eigVal <- svd$d^2/(ncol(dataMatCen)-1) # Eigenvalues of covariance matrix are equal to squared singular values devided by n-1, where n is the number of columns 
+eigVal <- svd$d^2/(ncol(dataMatCen)-1) # Eigenvalues of covariance matrix are equal to squared singular values devided by n-1, where n is the number of columns in the data matrix 
                                        # Eigenvalues (corresponding to eigenvectors) define variances along the axes of the principal components 
 
 # Compute and display the proportions of variance explained by the principal components ####
